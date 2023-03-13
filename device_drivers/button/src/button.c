@@ -38,17 +38,16 @@ static void IRAM_ATTR GPIOISRHandler(void* arg)
     /* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
     xHigherPriorityTaskWoken = pdFALSE;
 
-    /* Set bit 0 and bit 4 in xEventGroup. */
+    /* Set bit in xEventGroup. */
     xResult = xEventGroupSetBitsFromISR(
         buttonEventGroup,   /* The event group being updated. */
         ISRBIT0, /* The bits being set. */
         &xHigherPriorityTaskWoken
     );
 
-    // TRATAR RESULT
 
     /* Was the message posted successfully? */
-    if( xHigherPriorityTaskWoken )
+    if( xResult )
     {
         /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
         switch should be requested.  The macro used is port specific and will
