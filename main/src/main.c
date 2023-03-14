@@ -42,14 +42,12 @@ void initApp(void)
     // DHT sensor initialization
     initDHT();
     // Button initialization
-    initButtonISR();
+    initButton(BUTTON_PIN);
 
     // led control task initialization
     xTaskCreate(&vLedControlTask, "LedControlTask", 1024*2, NULL, 5, NULL);
     // sensor measurements task initialization
     xTaskCreate(&vSensorTask, "SensorTask", 1024*4, NULL, 5, NULL);
-    // sensor data send task initialization
-    xTaskCreate(&vSendDataTask, "SendDataTask", 1024*4, NULL, 5, NULL);
 }
 
 /**
@@ -94,48 +92,36 @@ void vSensorTask(void *pvParameter)
 }
 
 /**
- * @brief Send data task (MQTT)
+ * @brief Send data function (MQTT)
  * 
- * @param parameters 
  */
-void vSendDataTask(void *pvParameter)
+void vSendData(void)
 {
-    ESP_LOGI(TAG_SENSOR, "Initialing SendDataTask");
+    ESP_LOGI(TAG_MAIN, "Sending data");
     static SensorMeasurements_t fDataToSend;
-    while(true)
+    if(xQueueReceive(fSensorQueue, &fDataToSend, pdMS_TO_TICKS(SENSORQUEUE_WAIT_TIME)) == true)
     {
-        xEventGroupWaitBits(buttonEventGroup, BUTTON0, false, false, portMAX_DELAY);
-        vTaskDelay(DEBOUNCE_TIME / portTICK_PERIOD_MS);
-        if(gpio_get_level(BUTTON_PIN) == 0)
-        {
-            ESP_LOGI(TAG_MAIN,"Button pressed");
-            if(xQueueReceive(fSensorQueue, &fDataToSend, pdMS_TO_TICKS(SENSORQUEUE_WAIT_TIME)) == true)
-            {
-                cJSON *json;
-                char *json_str;
-                char *conv_str;
-                // json creating
-                json = cJSON_CreateObject();
-                cJSON_AddStringToObject(json, "ID", DEVICE_ID);
-                asprintf(&conv_str, "%.1f", fDataToSend.temp);
-                cJSON_AddStringToObject(json, "TEMP", conv_str);
-                asprintf(&conv_str, "%.1f", fDataToSend.hum);
-                cJSON_AddStringToObject(json, "UMID", conv_str);
-                asprintf(&conv_str, "%.1f", fDataToSend.angle);
-                cJSON_AddStringToObject(json, "ANG", conv_str);
-                json_str = cJSON_Print(json);
+        cJSON *json;
+        char *json_str;
+        char *conv_str;
+        // json creating
+        json = cJSON_CreateObject();
+        cJSON_AddStringToObject(json, "ID", DEVICE_ID);
+        asprintf(&conv_str, "%.1f", fDataToSend.temp);
+        cJSON_AddStringToObject(json, "TEMP", conv_str);
+        asprintf(&conv_str, "%.1f", fDataToSend.hum);
+        cJSON_AddStringToObject(json, "UMID", conv_str);
+        asprintf(&conv_str, "%.1f", fDataToSend.angle);
+        cJSON_AddStringToObject(json, "ANG", conv_str);
+        json_str = cJSON_Print(json);
 
-                esp_mqtt_client_publish(mqtt_client, TOPIC_MQTT_DATA, json_str, strlen(json_str), 0, 0);
+        esp_mqtt_client_publish(mqtt_client, TOPIC_MQTT_DATA, json_str, strlen(json_str), 0, 0);
 
-                ESP_LOGI(TAG_SENSOR, "Data published");
+        ESP_LOGI(TAG_MAIN, "Data published");
 
-                cJSON_Delete(json); // release memory
-                free(json_str); 
-                free(conv_str); 
-            }
-        }
-        xEventGroupClearBits(buttonEventGroup, BUTTON0);
-        vTaskDelay(DEBOUNCE_TIME / portTICK_PERIOD_MS);
+        cJSON_Delete(json); // release memory
+        free(json_str); 
+        free(conv_str); 
     }
 }
 
@@ -156,5 +142,41 @@ void vLedControlTask(void *pvParameter)
         xQueueReceive(fLedStatusQueue, &bLedStatus, portMAX_DELAY);
         gpio_set_level(LED_PIN, (bool)bLedStatus);
         vTaskDelay(STANDARD_WAIT_TIME / portTICK_PERIOD_MS);
+    }
+}
+
+/**
+ * @brief IoT Button initialization
+ * 
+ */
+void initButton(uint32_t gpio_pin_number)
+{
+    ESP_LOGI(TAG_MAIN,"Initialising pin %d" , gpio_pin_number);
+    button_handle_t buttonHandle = iot_button_create(gpio_pin_number, BUTTON_ACTIVE_LOW);
+    if (buttonHandle) {
+        /* Register a callback for a button tap (short press) event */
+        iot_button_set_evt_cb(buttonHandle, BUTTON_CB_PUSH, vButtonCallBack, (void *)gpio_pin_number);
+    }
+    else
+    {
+        ESP_LOGE(TAG_MAIN,"Failed to create pin %d handler", gpio_pin_number);
+    }
+}
+
+/**
+ * @brief Button pressed callback
+ * 
+ * @param arg 
+ */
+static void vButtonCallBack(void *arg)
+{
+    switch((uint32_t)arg)
+    {
+        case BUTTON_PIN:    ESP_LOGI(TAG_MAIN,"IoT button pressed");
+                            vSendData();
+        break;
+
+        default:            ESP_LOGE(TAG_MAIN,"Unknown button");
+        break;
     }
 }

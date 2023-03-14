@@ -39,6 +39,7 @@
 // cJSON library includes
 #include <cJSON.h>
 
+// definitions
 #define STANDARD_WAIT_TIME 1000 // main loop update time (ms)
 
 #define TAG_SENSOR            "SENSOR" 
@@ -49,6 +50,7 @@
 
 #define LEDSTATUS_QUEUE_SIZE  1
 #define LED_PIN               GPIO_NUM_19
+#define BUTTON_PIN            GPIO_NUM_22
 
 // queue declaration
 static QueueHandle_t fSensorQueue;
@@ -56,8 +58,10 @@ static QueueHandle_t fSensorQueue;
 // function prototypes
 void initApp(void); // user application initialization
 void vSensorTask(void *pvParameter); // sensor measurements task
-void vSendDataTask(void *pvParameter); // sensor measurements send data task
+void vSendData(void); // sensor measurements send data
 void vLedControlTask(void *pvParameter); // led control task
+void initButton(uint32_t gpio_pin_number); // button initialization
+static void vButtonCallBack(void *arg); // callback initialization
 
 // sensor measurements struct
 struct xSENSOR_MEASUREMENTS

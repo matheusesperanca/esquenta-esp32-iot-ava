@@ -27,6 +27,8 @@
         "nvs_flash.h": "c",
         "event_groups.h": "c",
         "esp_timer.h": "c",
-        "iot_button.h": "c"
+        "iot_button.h": "c",
+        "periph_ctrl.h": "c",
+        "*.inc": "c"
     }
 }
