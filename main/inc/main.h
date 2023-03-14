@@ -44,9 +44,8 @@
 
 #define TAG_SENSOR            "SENSOR" 
 #define TAG_MAIN              "MAIN" 
-#define SENSOR_REFRESH_TIME   3000 // sensor update time (ms)
-#define SENSORQUEUE_WAIT_TIME 5000 
-#define SENSOR_QUEUE_SIZE     3
+#define SENSOR_REFRESH_TIME   2500 // sensor update time (ms)
+#define SENSOR_QUEUE_SIZE     10
 
 #define LEDSTATUS_QUEUE_SIZE  1
 #define LED_PIN               GPIO_NUM_19
@@ -58,9 +57,9 @@ static QueueHandle_t fSensorQueue;
 // function prototypes
 void initApp(void); // user application initialization
 void vSensorTask(void *pvParameter); // sensor measurements task
-void vSendData(void); // sensor measurements send data
+static void vSendData(void); // sensor measurements send data
 void vLedControlTask(void *pvParameter); // led control task
-void initButton(uint32_t gpio_pin_number); // button initialization
+static void initButton(uint32_t gpio_pin_number); // button initialization
 static void vButtonCallBack(void *arg); // callback initialization
 
 // sensor measurements struct

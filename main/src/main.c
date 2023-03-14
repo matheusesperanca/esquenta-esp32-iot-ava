@@ -11,6 +11,10 @@
 
 #include "main.h"
 
+// Connected bit event group declarations
+static EventGroupHandle_t syncEventGroup;
+const static int READYTOSENT = BIT0; 
+
 /**
  * @brief Main function
  * 
@@ -41,13 +45,14 @@ void initApp(void)
     initGoniometer();
     // DHT sensor initialization
     initDHT();
-    // Button initialization
-    initButton(BUTTON_PIN);
 
     // led control task initialization
     xTaskCreate(&vLedControlTask, "LedControlTask", 1024*2, NULL, 5, NULL);
     // sensor measurements task initialization
     xTaskCreate(&vSensorTask, "SensorTask", 1024*4, NULL, 5, NULL);
+
+    // Button initialization
+    initButton(BUTTON_PIN);
 }
 
 /**
@@ -95,11 +100,11 @@ void vSensorTask(void *pvParameter)
  * @brief Send data function (MQTT)
  * 
  */
-void vSendData(void)
+static void vSendData(void)
 {
     ESP_LOGI(TAG_MAIN, "Sending data");
     static SensorMeasurements_t fDataToSend;
-    if(xQueueReceive(fSensorQueue, &fDataToSend, pdMS_TO_TICKS(SENSORQUEUE_WAIT_TIME)) == true)
+    if(xQueueReceive(fSensorQueue, &fDataToSend, portMAX_DELAY) == true)
     {
         cJSON *json;
         char *json_str;
@@ -123,6 +128,11 @@ void vSendData(void)
         free(json_str); 
         free(conv_str); 
     }
+    else
+    {
+        ESP_LOGI(TAG_MAIN, "Empty queue");
+    }
+    xEventGroupSetBits(syncEventGroup, READYTOSENT);
 }
 
 /**
@@ -149,8 +159,9 @@ void vLedControlTask(void *pvParameter)
  * @brief IoT Button initialization
  * 
  */
-void initButton(uint32_t gpio_pin_number)
+static void initButton(uint32_t gpio_pin_number)
 {
+    syncEventGroup = xEventGroupCreate();
     ESP_LOGI(TAG_MAIN,"Initialising pin %d" , gpio_pin_number);
     button_handle_t buttonHandle = iot_button_create(gpio_pin_number, BUTTON_ACTIVE_LOW);
     if (buttonHandle) {
@@ -161,6 +172,7 @@ void initButton(uint32_t gpio_pin_number)
     {
         ESP_LOGE(TAG_MAIN,"Failed to create pin %d handler", gpio_pin_number);
     }
+    xEventGroupSetBits(syncEventGroup, READYTOSENT);
 }
 
 /**
@@ -173,6 +185,8 @@ static void vButtonCallBack(void *arg)
     switch((uint32_t)arg)
     {
         case BUTTON_PIN:    ESP_LOGI(TAG_MAIN,"IoT button pressed");
+                            xEventGroupWaitBits(syncEventGroup, READYTOSENT, false, false, portMAX_DELAY);
+                            xEventGroupClearBits(syncEventGroup, READYTOSENT);
                             vSendData();
         break;
 

@@ -29,6 +29,7 @@
         "esp_timer.h": "c",
         "iot_button.h": "c",
         "periph_ctrl.h": "c",
-        "*.inc": "c"
+        "*.inc": "c",
+        "complex": "c"
     }
 }
