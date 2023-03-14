@@ -1,7 +1,7 @@
 /**
  * @file system.h
  * @author Matheus Arcangelo Esperanca
- * @brief 
+ * @brief ESP32 system initializations
  * @version 0.1
  * @date 2023-03-05
  * 
@@ -12,21 +12,21 @@
 #ifndef PLATFORM_DRIVERS_SYSTEM_INC_SYSTEM_H_
 #define PLATFORM_DRIVERS_SYSTEM_INC_SYSTEM_H_
 
-// 1 - Includes de bibl1otecas de suporte geral
+// general library includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 
-// Bibliotecas do FreeRTOS
+// FreeRTOS library includes
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 #include <freertos/queue.h>
 #include <freertos/event_groups.h>
 
-// Bibliotecas gerais da Espressif
+// Espressif library includes
 #include <esp_system.h>
 #include <esp_spi_flash.h>
 #include <nvs_flash.h>
@@ -35,22 +35,23 @@
 #include <esp_wifi.h>
 #include <esp_event.h>
 
-// Inclusao de driver
+// Drivers includes
 #include <driver/gpio.h>
   
-// Biblioteca do cJSON
+// cJSON library include
 #include <cJSON.h>
 
-// Biblioteca MQTT
+// MQTT library include
 #include <mqtt_client.h>
 
-// Declaracao de variaveis, definicoes e estruturas de escopo global
+// definitions 
 #define LED_HEART_BEAT_PIN  2      
 #define LED_HEART_BEAT_TON  500
 #define LED_HEART_BEAT_TOFF 500
 
 #define TAG_SYSTEM "SYSTEM"
 
+// function prototypes
 void initSystem(void);
 void vHeartBeatTask(void *pvParameter); // tarefa pisca led (código "rodando")
 

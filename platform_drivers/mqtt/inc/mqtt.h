@@ -63,9 +63,8 @@ QueueHandle_t fLedStatusQueue;
 EventGroupHandle_t mqttEventGroup;
 const static int CONNECTED_BIT = BIT0;
 
-// MQTT client and event handler declarations
+// MQTT client handler declarations
 esp_mqtt_client_handle_t mqtt_client;
-static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event);
 
 // general function prototypes
 void initMQTT(void); // mqtt initialization

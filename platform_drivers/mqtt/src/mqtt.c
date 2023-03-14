@@ -12,6 +12,9 @@
 // MQTT include
 #include "mqtt.h"
 
+// mqtt event handler initizalization
+static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event);
+
 /**
  * @brief MQTT service initialization
  * 
@@ -33,13 +36,16 @@ void initMQTT(void)
     // MQTT client initialization
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_start(mqtt_client);
+
+    ESP_LOGI(TAG_MQTT,"Waiting for broker connection");
+    xEventGroupWaitBits(mqttEventGroup, CONNECTED_BIT, false, false, portMAX_DELAY);
 }
 
 /**
  * @brief MQTT communication event handler
  * 
  * @param event event parameters
- * @return esp_err_t "ESP_OK" if ok
+ * @return esp_err_t ESP_OK ou ESP_FAIL
  */
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
 {

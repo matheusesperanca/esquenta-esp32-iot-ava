@@ -1,7 +1,7 @@
 /**
  * @file button.c
  * @author Matheus Arcangelo Esperanca
- * @brief 
+ * @brief Button ISR driver
  * @version 0.1
  * @date 2023-03-11
  * 
@@ -11,12 +11,20 @@
 
 #include "button.h"
 
+
+// function prototypes
+static void IRAM_ATTR GPIOISRHandler(void* arg);
+
+/**
+ * @brief ISR Button initialization
+ * 
+ */
 void initButtonISR(void)
 {
     buttonEventGroup = xEventGroupCreate();
     if(buttonEventGroup == NULL)
     {
-        ESP_LOGE(TAG_BUTTON,"Falha ao criar o EventGroup Button");
+        ESP_LOGE(TAG_BUTTON,"Button eventGroup error");
     }
 
     gpio_config_t io_conf;
@@ -31,6 +39,11 @@ void initButtonISR(void)
     gpio_isr_handler_add(BUTTON_PIN, GPIOISRHandler, (void*) BUTTON_PIN);
 }
 
+/**
+ * @brief GPIO ISR Handler
+ * 
+ * @param arg 
+ */
 static void IRAM_ATTR GPIOISRHandler(void* arg)
 {
     BaseType_t xHigherPriorityTaskWoken, xResult;
@@ -41,7 +54,7 @@ static void IRAM_ATTR GPIOISRHandler(void* arg)
     /* Set bit in xEventGroup. */
     xResult = xEventGroupSetBitsFromISR(
         buttonEventGroup,   /* The event group being updated. */
-        ISRBIT0, /* The bits being set. */
+        BUTTON0, /* The bits being set. */
         &xHigherPriorityTaskWoken
     );
 

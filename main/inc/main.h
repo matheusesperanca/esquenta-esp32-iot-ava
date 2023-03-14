@@ -1,7 +1,7 @@
 /**
  * @file main.h
  * @author Matheus Arcangelo Esperanca
- * @brief 
+ * @brief  Class "Eletronica embarcada com iot, IA e robótica" (exercicio esquenta-esp32-iot AVA) 
  * @version 0.1
  * @date 2023-03-05
  * 
@@ -12,15 +12,23 @@
 #ifndef MAIN_INC_MAIN_H_
 #define MAIN_INC_MAIN_H_
 
+// general library includes 
 #include <stdio.h>
+
+// FreeRTOS library includes
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <freertos/semphr.h>
 #include <freertos/queue.h>
 #include <freertos/event_groups.h>
+
+// drivers includes
 #include "driver/gpio.h"
+
+// Espressif library includes
 #include "sdkconfig.h"
 
+// Application includes
 #include "system.h"
 #include "wifi.h"
 #include "mqtt.h"
@@ -28,28 +36,30 @@
 #include "goniometer.h"
 #include "button.h"
 
-// Biblioteca do cJSON
+// cJSON library includes
 #include <cJSON.h>
 
-#define STANDARD_WAIT_TIME 1000 // tempo atualizacao loop principal
+#define STANDARD_WAIT_TIME 1000 // main loop update time (ms)
 
 #define TAG_SENSOR            "SENSOR" 
 #define TAG_MAIN              "MAIN" 
-#define SENSOR_REFRESH_TIME   3000 // tempo atualizacao leitura dos sensores
-#define SENSORQUEUE_WAIT_TIME 5000
+#define SENSOR_REFRESH_TIME   3000 // sensor update time (ms)
+#define SENSORQUEUE_WAIT_TIME 5000 
 #define SENSOR_QUEUE_SIZE     3
 
 #define LEDSTATUS_QUEUE_SIZE  1
 #define LED_PIN               GPIO_NUM_19
 
+// queue declaration
 static QueueHandle_t fSensorQueue;
 
-// prototipo de funcao
-void initApp(void); // funcao para inicializacao da aplicacao do usuario
-void vSensorTask(void *pvParameter); // tarefa para leitura dos sensores
-void vSendDataTask(void *pvParameter); // tarefa para envio dos dados dos sensores
-void vLedControlTask(void *pvParameter); // tarefa para controle do led por comando recebido via mqtt
+// function prototypes
+void initApp(void); // user application initialization
+void vSensorTask(void *pvParameter); // sensor measurements task
+void vSendDataTask(void *pvParameter); // sensor measurements send data task
+void vLedControlTask(void *pvParameter); // led control task
 
+// sensor measurements struct
 struct xSENSOR_MEASUREMENTS
 {
     float temp;

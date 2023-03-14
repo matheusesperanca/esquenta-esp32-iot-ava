@@ -1,7 +1,7 @@
 /**
  * @file dht.c
- * @author Matheus Arcangelo Esperanca
- * @brief 
+ * @author Matheus Arcangelo Esperanca (adaptation of Andrey-m library)
+ * @brief DHT22 sensor driver
  * @version 0.1
  * @date 2023-03-05
  * 
@@ -10,6 +10,19 @@
  */
 
 #include "dht.h"
+
+// definitions 
+#define TAG_DHT "DHT"
+
+#define DHT_OK              0
+#define DHT_CHECKSUM_ERROR  -1
+#define DHT_TIMEOUT_ERROR   -2
+#define MAXDHTDATA          5       // to complete 40 = 5*8 Bits
+
+static int pinDHT; 
+
+// function prototypes
+int   getSignalLevel(int usTimeOut, bool state);
 
 void initDHT(void)
 {
@@ -26,18 +39,18 @@ void errorHandlerDHT(int response)
     switch (response)
     {
         case DHT_TIMEOUT_ERROR:
-            ESP_LOGE(TAG_DHT, "Sensor Timeout\n");
+            ESP_LOGE(TAG_DHT, "Sensor timeout");
             break;
 
         case DHT_CHECKSUM_ERROR:
-            ESP_LOGE(TAG_DHT, "CheckSum error\n");
+            ESP_LOGE(TAG_DHT, "CheckSum error");
             break;
 
         case DHT_OK:
             break;
 
         default:
-            ESP_LOGE(TAG_DHT, "Unknown error\n");
+            ESP_LOGE(TAG_DHT, "Unknown error");
     }
 }
 
@@ -63,11 +76,11 @@ int getSignalLevel(int usTimeOut, bool state)
 }
 
 /**
- * @brief Metodo leitura sensor DHT
+ * @brief temperature and humidity measurement function
  * 
- * @param temperature endereco da variavel para receber a temperatura
- * @param umidity endereco da variavel para receber a temperatura
- * @return int 0 se ok, verificar "errorHandler"
+ * @param temperature temperature float pointer
+ * @param humidity humidity float pointer
+ * @return see errorHandlerDHT()
  */
 int readDHT(float *temperature, float *humidity)
 {

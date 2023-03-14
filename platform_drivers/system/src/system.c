@@ -1,7 +1,7 @@
 /**
  * @file system.c
  * @author Matheus Arcangelo Esperanca
- * @brief 
+ * @brief ESP32 system initializations
  * @version 0.1
  * @date 2023-03-05
  * 
@@ -12,12 +12,12 @@
 #include "system.h"
 
 /**
- * @brief Inicializa sistema
+ * @brief System initialization
  * 
  */
 void initSystem(void)
 {
-    // inicializa a flash da esp
+    // ESP flash initialization
     ESP_ERROR_CHECK( nvs_flash_init());
     ESP_LOGI(TAG_SYSTEM,"Initializing System");
     
@@ -25,20 +25,20 @@ void initSystem(void)
 }
 
 /**
- * @brief Tarefa auxiliar para controle de LED a operacao normal
+ * @brief Heart beat idle system task
  * 
- * @param pvParameter - Parametros para inicializacao da tarega
+ * @param pvParameter - Task parameters
 */
 void vHeartBeatTask(void *pvParameter)
 {
-    ESP_LOGI(TAG_SYSTEM, "Iniciando HeartBeatTask");
+    ESP_LOGI(TAG_SYSTEM, "Initializing HeartBeatTask");
     gpio_pad_select_gpio(LED_HEART_BEAT_PIN);
     gpio_set_direction(LED_HEART_BEAT_PIN, GPIO_MODE_OUTPUT);
     while(1)
     {
         gpio_set_level(LED_HEART_BEAT_PIN, false);
-        vTaskDelay(LED_HEART_BEAT_TOFF / portTICK_PERIOD_MS); // delay em ms
+        vTaskDelay(LED_HEART_BEAT_TOFF / portTICK_PERIOD_MS); // delay ms
         gpio_set_level(LED_HEART_BEAT_PIN, true);
-        vTaskDelay(LED_HEART_BEAT_TON / portTICK_PERIOD_MS); // delay em ms
+        vTaskDelay(LED_HEART_BEAT_TON / portTICK_PERIOD_MS); // delay ms
     }
 }
