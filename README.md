@@ -1,6 +1,10 @@
-### Exercício ESQUENTA ESP32 IOT
+# Exercício 4 AVA
 
-## Modificações:
+MQTT com ESP32
+
+Implementações para atividade avaliativa da UNISAL
+
+# Modificações:
 
 a. Modifique a tarefa DHT_task para ser uma tarefa mais ampla, como "Sensor_Task", a fim de realizar a leitura dos seguintes sinais a cada 5s:
 - Temperatura (via DHT22)
